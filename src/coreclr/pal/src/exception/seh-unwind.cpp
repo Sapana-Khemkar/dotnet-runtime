@@ -176,6 +176,28 @@ enum
     ASSIGN_REG(R13)        \
     ASSIGN_REG(R14)        \
     ASSIGN_REG(R15)
+#elif (defined(HOST_UNIX) && defined(HOST_POWERPC64))
+#define ASSIGN_UNWIND_REGS \
+    ASSIGN_REG(Nip)        \
+    ASSIGN_REG(R14)        \
+    ASSIGN_REG(R15)        \
+    ASSIGN_REG(R16)        \
+    ASSIGN_REG(R17)        \
+    ASSIGN_REG(R18)        \
+    ASSIGN_REG(R19)        \
+    ASSIGN_REG(R20)        \
+    ASSIGN_REG(R21)        \
+    ASSIGN_REG(R22)        \
+    ASSIGN_REG(R23)        \
+    ASSIGN_REG(R24)        \
+    ASSIGN_REG(R25)        \
+    ASSIGN_REG(R26)        \
+    ASSIGN_REG(R27)        \
+    ASSIGN_REG(R28)        \
+    ASSIGN_REG(R29)        \
+    ASSIGN_REG(R30)        \
+    ASSIGN_REG(R31)        
+	//TODO Vikas need clarifiaction for selected registers.  Nonvolatile registers used for local variables
 #else
 #error unsupported architecture
 #endif
@@ -392,6 +414,27 @@ void UnwindContextToWinContext(unw_cursor_t *cursor, CONTEXT *winContext)
     unw_get_reg(cursor, UNW_S390X_R12, (unw_word_t *) &winContext->R12);
     unw_get_reg(cursor, UNW_S390X_R13, (unw_word_t *) &winContext->R13);
     unw_get_reg(cursor, UNW_S390X_R14, (unw_word_t *) &winContext->R14);
+#elif (defined(HOST_UNIX) && defined(HOST_POWERPC64))
+    unw_get_reg(cursor, UNW_REG_SP, (unw_word_t *) &winContext->R31);
+    unw_get_reg(cursor, UNW_REG_IP, (unw_word_t *) &winContext->Nip);
+    unw_get_reg(cursor, UNW_PPC64_R14, (unw_word_t *) &winContext->R14);
+    unw_get_reg(cursor, UNW_PPC64_R15, (unw_word_t *) &winContext->R15);
+    unw_get_reg(cursor, UNW_PPC64_R16, (unw_word_t *) &winContext->R16);
+    unw_get_reg(cursor, UNW_PPC64_R17, (unw_word_t *) &winContext->R17);
+    unw_get_reg(cursor, UNW_PPC64_R18, (unw_word_t *) &winContext->R18);
+    unw_get_reg(cursor, UNW_PPC64_R19, (unw_word_t *) &winContext->R19);
+    unw_get_reg(cursor, UNW_PPC64_R20, (unw_word_t *) &winContext->R20);
+    unw_get_reg(cursor, UNW_PPC64_R21, (unw_word_t *) &winContext->R21);
+    unw_get_reg(cursor, UNW_PPC64_R22, (unw_word_t *) &winContext->R22);
+    unw_get_reg(cursor, UNW_PPC64_R23, (unw_word_t *) &winContext->R23);
+    unw_get_reg(cursor, UNW_PPC64_R24, (unw_word_t *) &winContext->R24);
+    unw_get_reg(cursor, UNW_PPC64_R25, (unw_word_t *) &winContext->R25);
+    unw_get_reg(cursor, UNW_PPC64_R26, (unw_word_t *) &winContext->R26);
+    unw_get_reg(cursor, UNW_PPC64_R27, (unw_word_t *) &winContext->R27);
+    unw_get_reg(cursor, UNW_PPC64_R28, (unw_word_t *) &winContext->R28);
+    unw_get_reg(cursor, UNW_PPC64_R29, (unw_word_t *) &winContext->R29);
+    unw_get_reg(cursor, UNW_PPC64_R30, (unw_word_t *) &winContext->R30);
+    //TODO Vikas
 #else
 #error unsupported architecture
 #endif
@@ -469,6 +512,26 @@ void GetContextPointers(unw_cursor_t *cursor, unw_context_t *unwContext, KNONVOL
     GetContextPointer(cursor, unwContext, UNW_S390X_R13, &contextPointers->R13);
     GetContextPointer(cursor, unwContext, UNW_S390X_R14, &contextPointers->R14);
     GetContextPointer(cursor, unwContext, UNW_S390X_R15, &contextPointers->R15);
+#elif (defined(HOST_UNIX) && defined(HOST_POWERPC64))
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R14, &contextPointers->R14);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R15, &contextPointers->R15);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R16, &contextPointers->R16);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R17, &contextPointers->R17);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R18, &contextPointers->R18);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R19, &contextPointers->R19);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R20, &contextPointers->R20);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R21, &contextPointers->R21);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R22, &contextPointers->R22);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R23, &contextPointers->R23);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R24, &contextPointers->R24);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R25, &contextPointers->R25);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R26, &contextPointers->R26);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R27, &contextPointers->R27);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R28, &contextPointers->R28);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R29, &contextPointers->R29);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R30, &contextPointers->R30);
+    GetContextPointer(cursor, unwContext, UNW_PPC64_R31, &contextPointers->R31);
+    //TODO vikas
 #else
 #error unsupported architecture
 #endif

@@ -9,7 +9,7 @@
 #define LOCAL_LABEL(name) L##name
 #else
 #define C_FUNC(name) name
-#if defined(HOST_AMD64) || defined(HOST_X86) || defined(HOST_S390X)
+#if defined(HOST_AMD64) || defined(HOST_X86) || defined(HOST_S390X) || defined(HOST_POWERPC64)
 #define EXTERNAL_C_FUNC(name) C_FUNC(name)@plt
 #else
 #define EXTERNAL_C_FUNC(name) C_FUNC(name)
@@ -43,4 +43,6 @@
 #include "unixasmmacrosarm64.inc"
 #elif defined(HOST_S390X)
 #include "unixasmmacross390x.inc"
+#elif defined(HOST_POWERPC64)
+#include "unixasmmacrosppc64le.inc"
 #endif
