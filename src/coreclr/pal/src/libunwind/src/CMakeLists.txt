@@ -317,10 +317,10 @@ SET(libunwind_la_SOURCES_ppc64le
     ${libunwind_la_SOURCES_local}
     ppc64/setcontext.S
     ppc64/Lapply_reg_state.c ppc64/Lreg_states_iterate.c
-    ppc64/Lcreate_addr_space.c ppc64/Lget_save_loc.c ppc64/Lglobal.c
-    ppc64/Linit.c ppc64/Linit_local.c
+    ppc64/Lcreate_addr_space.c ppc/Lget_save_loc.c ppc64/Lglobal.c
+    ppc64/Linit.c ppc/Linit_local.c
     ppc64/Lregs.c ppc64/Lresume.c
-    ppc64/Lis_signal_frame.c ppc64/Lstep.c
+    ppc/Lis_signal_frame.c ppc64/Lstep.c
 )
 
 # The list of files that go into libunwind-ppc64le:
@@ -328,10 +328,10 @@ SET(libunwind_ppc64le_la_SOURCES_ppc64le
     ${libunwind_la_SOURCES_ppc64le_common}
     ${libunwind_la_SOURCES_generic}
     ppc64/Gapply_reg_state.c ppc64/Greg_states_iterate.c
-    ppc64/Gcreate_addr_space.c ppc64/get_save_loc.c ppc64/Gglobal.c
-    ppc64/Ginit.c ppc64/Ginit_local.c
+    ppc64/Gcreate_addr_space.c ppc/Gget_save_loc.c ppc64/Gglobal.c
+    ppc64/Ginit.c ppc/Ginit_local.c
     ppc64/Gregs.c ppc64/Gresume.c
-    ppc64/Gis_signal_frame.c ppc64/Gstep.c
+    ppc/Gis_signal_frame.c ppc64/Gstep.c
 )
 
 if(CLR_CMAKE_HOST_UNIX)

@@ -77,11 +77,9 @@
 #define CONTEXT_F29           CONTEXT_F28+8
 #define CONTEXT_F30           CONTEXT_F29+8
 #define CONTEXT_F31           CONTEXT_F30+8
-#define CONTEXT_Lr            CONTEXT_F31+8
-#define CONTEXT_Ctr           CONTEXT_Lr+8
-#define CONTEXT_Nip           CONTEXT_Ctr+8
-#define CONTEXT_Xer           CONTEXT_Nip+8
-#define CONTEXT_cr            CONTEXT_Xer+8
-#define CONTEXT_Size          CONTEXT_cr+8
+#define CONTEXT_XER           CONTEXT_F31+8
+#define CONTEXT_LR            CONTEXT_XER+8
+#define CONTEXT_CTR           CONTEXT_LR+8
+#define CONTEXT_Size          CONTEXT_CTR+8
 
 #endif
