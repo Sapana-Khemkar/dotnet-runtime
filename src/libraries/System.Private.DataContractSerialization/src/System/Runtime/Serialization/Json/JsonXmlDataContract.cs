@@ -46,7 +46,7 @@ namespace System.Runtime.Serialization.Json
         [RequiresUnreferencedCode(DataContract.SerializerTrimmerWarning)]
         public override void WriteJsonValueCore(XmlWriterDelegator jsonWriter, object obj, XmlObjectSerializerWriteContextComplexJson? context, RuntimeTypeHandle declaredTypeHandle)
         {
-            DataContractSerializer dataContractSerializer = new DataContractSerializer(Type.GetTypeFromHandle(declaredTypeHandle),
+            DataContractSerializer dataContractSerializer = new DataContractSerializer(Type.GetTypeFromHandle(declaredTypeHandle)!,
                 GetKnownTypesFromContext(context, (context == null) ? null : context.SerializerKnownTypeList), 1, false, false); //  maxItemsInObjectGraph //  ignoreExtensionDataObject //  preserveObjectReferences
 
             MemoryStream memoryStream = new MemoryStream();
@@ -56,7 +56,7 @@ namespace System.Runtime.Serialization.Json
             jsonWriter.WriteString(serialized);
         }
 
-        private List<Type> GetKnownTypesFromContext(XmlObjectSerializerContext? context, IList<Type>? serializerKnownTypeList)
+        private static List<Type> GetKnownTypesFromContext(XmlObjectSerializerContext? context, IList<Type>? serializerKnownTypeList)
         {
             List<Type> knownTypesList = new List<Type>();
             if (context != null)

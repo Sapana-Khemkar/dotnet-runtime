@@ -20,6 +20,7 @@ namespace System.ServiceProcess.Tests
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
         protected static bool IsProcessElevated => s_isElevated.Value;
         protected static bool IsElevatedAndSupportsEventLogs => IsProcessElevated && PlatformDetection.IsNotWindowsNanoServer;
+        protected static bool IsElevatedAndWindows10OrLater => IsProcessElevated && PlatformDetection.IsWindows10OrLater;
 
         private bool _disposed;
 
@@ -71,6 +72,18 @@ namespace System.ServiceProcess.Tests
             }
         }
 
+#if NETCOREAPP
+        [Theory]
+        [InlineData(-2)]
+        [InlineData((long)int.MaxValue + 1)]
+        public void RequestAdditionalTime_Throws_ArgumentOutOfRangeException(long milliseconds)
+        {
+            TimeSpan time = TimeSpan.FromMilliseconds(milliseconds);
+            using var serviceBase = new ServiceBase();
+            Assert.Throws<ArgumentOutOfRangeException>("time", () => serviceBase.RequestAdditionalTime(time));
+        }
+#endif
+
         [ConditionalFact(nameof(IsProcessElevated))]
         public void TestOnStartThenStop()
         {
@@ -81,7 +94,7 @@ namespace System.ServiceProcess.Tests
             controller.WaitForStatus(ServiceControllerStatus.Stopped);
         }
 
-        [ConditionalFact(nameof(IsProcessElevated))]
+        [ConditionalFact(nameof(IsElevatedAndWindows10OrLater))] // flaky on Windows 8.1
         public void TestOnStartWithArgsThenStop()
         {
             ServiceController controller = ConnectToServer();

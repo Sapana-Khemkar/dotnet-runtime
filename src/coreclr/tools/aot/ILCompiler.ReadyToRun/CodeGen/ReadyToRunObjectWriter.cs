@@ -180,7 +180,7 @@ namespace ILCompiler.DependencyAnalysis
 
                 if (generateSymbols)
                 {
-                    _symbolFileBuilder = new SymbolFileBuilder(_outputInfoBuilder);
+                    _symbolFileBuilder = new SymbolFileBuilder(_outputInfoBuilder, _nodeFactory.Target);
                 }
 
                 if (generateProfileFile)
@@ -341,11 +341,11 @@ namespace ILCompiler.DependencyAnalysis
                     if (nativeDebugDirectoryEntryNode is not null)
                     {
                         Debug.Assert(_generatePdbFile);
-                        // Compute MD5 hash of the output image and store that in the native DebugDirectory entry
-                        using (var md5Hash = MD5.Create())
+                        // Compute hash of the output image and store that in the native DebugDirectory entry
+                        using (var hashAlgorithm = SHA256.Create())
                         {
                             peStream.Seek(0, SeekOrigin.Begin);
-                            byte[] hash = md5Hash.ComputeHash(peStream);
+                            byte[] hash = hashAlgorithm.ComputeHash(peStream);
                             byte[] rsdsEntry = nativeDebugDirectoryEntryNode.GenerateRSDSEntryData(hash);
 
                             int offsetToUpdate = r2rPeBuilder.GetSymbolFilePosition(nativeDebugDirectoryEntryNode);
@@ -400,7 +400,7 @@ namespace ILCompiler.DependencyAnalysis
                         {
                             path = Path.GetDirectoryName(_objectFilePath);
                         }
-                        _symbolFileBuilder.SavePerfMap(path, _perfMapFormatVersion, _objectFilePath, _nodeFactory.Target);
+                        _symbolFileBuilder.SavePerfMap(path, _perfMapFormatVersion, _objectFilePath);
                     }
 
                     if (_profileFileBuilder != null)

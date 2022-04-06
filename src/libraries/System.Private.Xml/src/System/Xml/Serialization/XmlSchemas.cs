@@ -204,7 +204,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void Prepare(XmlSchema schema)
+        private static void Prepare(XmlSchema schema)
         {
             // need to remove illegal <import> externals;
             ArrayList removes = new ArrayList();
@@ -361,7 +361,7 @@ namespace System.Xml.Serialization
             }
         }
 
-        private void AddImport(IList schemas, string? ns)
+        private static void AddImport(IList schemas, string? ns)
         {
             foreach (XmlSchema s in schemas)
             {
@@ -527,7 +527,7 @@ namespace System.Xml.Serialization
                     ns = ((XmlSchema)tmp).TargetNamespace;
                 }
             }
-            string? item = null;
+            string? item;
             if (o is XmlSchemaNotation)
             {
                 item = SR.Format(SR.XmlSchemaNamedItem, ns, "notation", ((XmlSchemaNotation)o).Name, details);
@@ -614,12 +614,11 @@ namespace System.Xml.Serialization
         private static string MergeFailedMessage(XmlSchemaObject src, XmlSchemaObject dest, string? ns)
         {
             string err = SR.Format(SR.XmlSerializableMergeItem, ns, GetSchemaItem(src, ns, null));
-            err += "\r\n" + Dump(src);
-            err += "\r\n" + Dump(dest);
+            err += $"{Environment.NewLine}{Dump(src)}{Environment.NewLine}{Dump(dest)}";
             return err;
         }
 
-        internal XmlSchemaObject? Find(XmlSchemaObject o, IList originals)
+        internal static XmlSchemaObject? Find(XmlSchemaObject o, IList originals)
         {
             string? name = ItemName(o);
             if (name == null)

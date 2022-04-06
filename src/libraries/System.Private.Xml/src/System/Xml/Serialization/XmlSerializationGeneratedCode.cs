@@ -16,14 +16,6 @@ namespace System.Xml.Serialization
     ///<internalonly/>
     public abstract class XmlSerializationGeneratedCode
     {
-        internal void Init(TempAssembly? tempAssembly)
-        {
-        }
-
-        // this method must be called at the end of serialization
-        internal void Dispose()
-        {
-        }
     }
     internal class XmlSerializationCodeGen
     {
@@ -92,7 +84,7 @@ namespace System.Xml.Serialization
             return (string?)_methodNames[mapping];
         }
 
-        private TypeMapping[] EnsureArrayIndex(TypeMapping[] a, int index)
+        private static TypeMapping[] EnsureArrayIndex(TypeMapping[] a, int index)
         {
             if (a == null) return new TypeMapping[32];
             if (index < a.Length) return a;
@@ -247,7 +239,7 @@ namespace System.Xml.Serialization
         internal string GenerateTypedSerializer(string? readMethod, string? writeMethod, XmlMapping mapping, CodeIdentifiers classes, string baseSerializer, string readerClass, string writerClass)
         {
             string serializerName = CodeIdentifier.MakeValid(Accessor.UnescapeName(mapping.Accessor.Mapping!.TypeDesc!.Name));
-            serializerName = classes.AddUnique(serializerName + "Serializer", mapping);
+            serializerName = classes.AddUnique($"{serializerName}Serializer", mapping);
 
             _writer.WriteLine();
             _writer.Write("public sealed class ");

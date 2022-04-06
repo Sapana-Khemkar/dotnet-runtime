@@ -179,7 +179,7 @@ namespace System.Xml
             }
         }
 
-        private string ConstructBaseURI(string baseURI, string systemId)
+        private static string ConstructBaseURI(string baseURI, string systemId)
         {
             if (baseURI == null)
                 return systemId;
@@ -188,7 +188,7 @@ namespace System.Xml
             if (nCount > 0 && nCount < baseURI.Length)
                 buf = baseURI.Substring(0, nCount);
             else if (nCount == 0)
-                buf = buf + "\\";
+                buf = $"{buf}\\";
             return (buf + systemId.Replace('\\', '/'));
         }
 

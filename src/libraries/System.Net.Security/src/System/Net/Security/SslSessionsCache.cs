@@ -134,9 +134,9 @@ namespace System.Net.Security
 
             //SafeCredentialReference? cached;
             SafeFreeCredentials? credentials = GetCachedCredential(key);
-            if (credentials == null || credentials.IsClosed || credentials.IsInvalid)
+            if (credentials == null || credentials.IsClosed || credentials.IsInvalid || credentials.Expiry < DateTime.UtcNow)
             {
-                if (NetEventSource.Log.IsEnabled()) NetEventSource.Info(null, $"Not found or invalid, Current Cache Coun = {s_cachedCreds.Count}");
+                if (NetEventSource.Log.IsEnabled()) NetEventSource.Info(null, $"Not found or invalid, Current Cache Count = {s_cachedCreds.Count}");
                 return null;
             }
 
@@ -169,12 +169,13 @@ namespace System.Net.Security
 
             SafeFreeCredentials? credentials = GetCachedCredential(key);
 
-            if (credentials == null || credentials.IsClosed || credentials.IsInvalid)
+            DateTime utcNow = DateTime.UtcNow;
+            if (credentials == null || credentials.IsClosed || credentials.IsInvalid || credentials.Expiry < utcNow)
             {
                 lock (s_cachedCreds)
                 {
                     credentials = GetCachedCredential(key);
-                    if (credentials == null || credentials.IsClosed || credentials.IsInvalid)
+                    if (credentials == null || credentials.IsClosed || credentials.IsInvalid || credentials.Expiry < utcNow)
                     {
                         SafeCredentialReference? cached = SafeCredentialReference.CreateReference(creds);
 
@@ -220,8 +221,8 @@ namespace System.Net.Security
 
                     for (int i = 0; i < toRemoveAttempt.Length; ++i)
                     {
-                        SafeCredentialReference? cahced = toRemoveAttempt[i].Value;
-                        SafeFreeCredentials? creds = cahced.Target;
+                        SafeCredentialReference? cached = toRemoveAttempt[i].Value;
+                        SafeFreeCredentials? creds = cached.Target;
 
                         if (creds == null)
                         {
@@ -229,11 +230,11 @@ namespace System.Net.Security
                             continue;
                         }
 
-                        cahced.Dispose();
-                        cahced = SafeCredentialReference.CreateReference(creds);
-                        if (cahced != null)
+                        cached.Dispose();
+                        cached = SafeCredentialReference.CreateReference(creds);
+                        if (cached != null)
                         {
-                            s_cachedCreds[toRemoveAttempt[i].Key] = cahced;
+                            s_cachedCreds[toRemoveAttempt[i].Key] = cached;
                         }
                         else
                         {

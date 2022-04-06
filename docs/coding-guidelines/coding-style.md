@@ -1,7 +1,7 @@
 C# Coding Style
 ===============
 
-For C++ files (*.cpp and *.h), we use clang-format (version 3.6+) to ensure code styling. After changing any Cpp or H file and before merging, src/Native/format-code.sh must be run. This script will ensure that all native code files adhere to the coding style guidelines.
+For C++ files (*.cpp and *.h), we use clang-format (version 3.8) to ensure code styling. After changing any Cpp or H file and before merging, src/Native/format-code.sh must be run. This script will ensure that all native code files adhere to the coding style guidelines.
 
 For other types of files (xml, bat, sh, etc), our current best guidance is consistency. When editing files, keep new code and changes consistent with the style in the files. For new files, it should conform to the style for that component. If there is a completely new component, anything that is reasonably broadly accepted is fine. For script files, please refer to the scripting blog for [tips](https://devblogs.microsoft.com/scripting/tag/powertip) and [best practices](https://devblogs.microsoft.com/scripting/tag/best-practices).
 
@@ -24,6 +24,7 @@ The general rule we follow is "use Visual Studio defaults".
 9. If a file happens to differ in style from these guidelines (e.g. private members are named `m_member`
    rather than `_member`), the existing style in that file takes precedence.
 10. We only use `var` when the type is explicitly named on the right-hand side, typically due to either `new` or an explicit cast, e.g. `var stream = new FileStream(...)` not `var stream = OpenStandardInput()`.
+    - Similarly, target-typed `new()` can only be used when the type is explicitly named on the left-hand side, in a variable definition statement or a field definition statement. e.g. `FileStream stream = new(...);`, but not `stream = new(...);` (where the type was specified on a previous line).
 11. We use language keywords instead of BCL types (e.g. `int, string, float` instead of `Int32, String, Single`, etc) for both type references as well as method calls (e.g. `int.Parse` instead of `Int32.Parse`). See issue [#13976](https://github.com/dotnet/runtime/issues/13976) for examples.
 12. We use PascalCasing to name all our constant local variables and fields. The only exception is for interop code where the constant value should exactly match the name and value of the code you are calling via interop.
 13. We use PascalCasing for all method names, including local functions.

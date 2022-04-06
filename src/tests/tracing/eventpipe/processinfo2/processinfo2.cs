@@ -150,7 +150,9 @@ namespace Tracing.Tests.ProcessInfoValidation
             string currentProcessCommandLine = $"{currentProcess.MainModule.FileName} {System.Reflection.Assembly.GetExecutingAssembly().Location}";
             string receivedCommandLine = NormalizeCommandLine(commandLine);
 
-            Utils.Assert(currentProcessCommandLine.Equals(receivedCommandLine, StringComparison.OrdinalIgnoreCase), $"CommandLine must match current process. Expected: {currentProcessCommandLine}, Received: {receivedCommandLine} (original: {commandLine})");
+            // ActiveIssue https://github.com/dotnet/runtime/issues/62729
+            if (!OperatingSystem.IsAndroid())
+                Utils.Assert(currentProcessCommandLine.Equals(receivedCommandLine, StringComparison.OrdinalIgnoreCase), $"CommandLine must match current process. Expected: {currentProcessCommandLine}, Received: {receivedCommandLine} (original: {commandLine})");
 
             // VALIDATE OS
             start = end;
@@ -178,6 +180,10 @@ namespace Tracing.Tests.ProcessInfoValidation
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 expectedOSValue = "Linux";
+            }
+            else if (OperatingSystem.IsAndroid())
+            {
+                expectedOSValue = "Android";
             }
             else
             {
@@ -243,8 +249,7 @@ namespace Tracing.Tests.ProcessInfoValidation
 
             string expectedClrProductVersion = typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
-            // https://github.com/dotnet/runtime/issues/60532
-            // Utils.Assert(expectedClrProductVersion.Equals(clrProductVersion), $"ClrProductVersion must match. Expected: \"{expectedClrProductVersion}\", received: \"{clrProductVersion}\"");
+            Utils.Assert(expectedClrProductVersion.Equals(clrProductVersion), $"ClrProductVersion must match. Expected: \"{expectedClrProductVersion}\", received: \"{clrProductVersion}\"");
 
             Utils.Assert(end == totalSize, $"Full payload should have been read. Expected: {totalSize}, Received: {end}");
 

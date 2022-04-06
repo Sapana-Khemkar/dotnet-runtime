@@ -43,6 +43,21 @@ namespace ILCompiler.DependencyAnalysis.ReadyToRun
         }
     }
 
+    public static class DeterministicDebugDirectoryEntry
+    {
+        internal static void EmitHeader(ref ObjectDataBuilder builder)
+        {
+            builder.EmitUInt(0 /* Characteristics */);
+            builder.EmitUInt(0);
+            builder.EmitUShort(0);
+            builder.EmitUShort(0);
+            builder.EmitInt((int)DebugDirectoryEntryType.Reproducible);
+            builder.EmitInt(0);
+            builder.EmitUInt(0);
+            builder.EmitUInt(0);
+        }
+    }
+
     public class PerfMapDebugDirectoryEntryNode : DebugDirectoryEntryNode
     {
         const int PerfMapEntrySize =
@@ -107,6 +122,18 @@ namespace ILCompiler.DependencyAnalysis.ReadyToRun
             }
         }
 
+        internal void EmitHeader(ref ObjectDataBuilder builder)
+        {
+            builder.EmitUInt(0);        /* Characteristics */
+            builder.EmitUInt(0);        /* Stamp */
+            builder.EmitUShort(1);      /* Major */
+            builder.EmitUShort(0);      /* Minor */
+            builder.EmitInt((int)PerfMapEntryType);
+            builder.EmitInt(Size);
+            builder.EmitReloc(this, RelocType.IMAGE_REL_BASED_ADDR32NB);
+            builder.EmitReloc(this, RelocType.IMAGE_REL_FILE_ABSOLUTE);
+        }
+
         public override int CompareToImpl(ISortableNode other, CompilerComparer comparer)
         {
             return _entryName.CompareTo(((PerfMapDebugDirectoryEntryNode)other)._entryName);
@@ -153,7 +180,7 @@ namespace ILCompiler.DependencyAnalysis.ReadyToRun
             return builder.ToObjectData();
         }
 
-        public byte[] GenerateRSDSEntryData(byte[] md5Hash)
+        public byte[] GenerateRSDSEntryData(byte[] hash)
         {
             MemoryStream rsdsEntry = new MemoryStream(RSDSSize);
 
@@ -161,14 +188,8 @@ namespace ILCompiler.DependencyAnalysis.ReadyToRun
             {
                 writer.Write(RsdsMagic);
 
-                // The PDB signature will be the same as our NGEN signature.
-                // However we want the printed version of the GUID to be the same as the
-                // byte dump of the signature so we swap bytes to make this work.
-                Debug.Assert(md5Hash.Length == 16);
-                writer.Write((uint)((md5Hash[0] * 256 + md5Hash[1]) * 256 + md5Hash[2]) * 256 + md5Hash[3]);
-                writer.Write((ushort)(md5Hash[4] * 256 + md5Hash[5]));
-                writer.Write((ushort)(md5Hash[6] * 256 + md5Hash[7]));
-                writer.Write(md5Hash, 8, 8);
+                Debug.Assert(hash.Length >= 16);
+                writer.Write(hash, 0, 16);
 
                 // Age
                 writer.Write(1);
@@ -186,6 +207,20 @@ namespace ILCompiler.DependencyAnalysis.ReadyToRun
         public override int CompareToImpl(ISortableNode other, CompilerComparer comparer)
         {
             return _pdbName.CompareTo(((NativeDebugDirectoryEntryNode)other)._pdbName);
+        }
+
+        internal void EmitHeader(ref ObjectDataBuilder builder, uint stamp, ushort majorVersion)
+        {
+            builder.EmitUInt(0);        /* Characteristics */
+            builder.EmitUInt(stamp);
+            builder.EmitUShort(majorVersion);
+            // Make sure the "is portable pdb" indicator (MinorVersion == 0x504d) is clear.
+            // The NI PDB generated currently is a full PDB.
+            builder.EmitUShort(0 /* MinorVersion */);
+            builder.EmitInt((int)DebugDirectoryEntryType.CodeView);
+            builder.EmitInt(Size);
+            builder.EmitReloc(this, RelocType.IMAGE_REL_BASED_ADDR32NB);
+            builder.EmitReloc(this, RelocType.IMAGE_REL_FILE_ABSOLUTE);
         }
     }
 

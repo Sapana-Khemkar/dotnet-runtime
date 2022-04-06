@@ -34,6 +34,7 @@ namespace Microsoft.WebAssembly.Diagnostics
 
         public IConfiguration Configuration { get; }
 
+#pragma warning disable CA1822
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IOptionsMonitor<ProxyOptions> optionsAccessor, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
@@ -56,6 +57,7 @@ namespace Microsoft.WebAssembly.Diagnostics
                 .UseWebSockets()
                 .UseDebugProxy(options);
         }
+#pragma warning restore CA1822
     }
 
     internal static class DebugExtensions
@@ -139,7 +141,9 @@ namespace Microsoft.WebAssembly.Diagnostics
                     Dictionary<string, string>[] tabs = await ProxyGetJsonAsync<Dictionary<string, string>[]>(GetEndpoint(context));
                     Dictionary<string, string>[] alteredTabs = tabs.Select(t => mapFunc(t, context, devToolsHost)).ToArray();
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(alteredTabs));
+                    string text = JsonSerializer.Serialize(alteredTabs);
+                    context.Response.ContentLength = text.Length;
+                    await context.Response.WriteAsync(text);
                 }
 
                 async Task ConnectProxy(HttpContext context)
@@ -151,15 +155,25 @@ namespace Microsoft.WebAssembly.Diagnostics
                     }
 
                     var endpoint = new Uri($"ws://{devToolsHost.Authority}{context.Request.Path}");
+                    int runtimeId = 0;
+                    if (context.Request.Query.TryGetValue("RuntimeId", out StringValues runtimeIdValue) &&
+                                            int.TryParse(runtimeIdValue.FirstOrDefault(), out int parsedId))
+                    {
+                        runtimeId = parsedId;
+                    }
                     try
                     {
                         using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
-                            builder.AddSimpleConsole(options => options.SingleLine = true)
+                            builder.AddSimpleConsole(options =>
+                                    {
+                                        options.SingleLine = true;
+                                        options.TimestampFormat = "[HH:mm:ss] ";
+                                    })
                                    .AddFilter(null, LogLevel.Information)
                         );
 
                         context.Request.Query.TryGetValue("urlSymbolServer", out StringValues urlSymbolServerList);
-                        var proxy = new DebuggerProxy(loggerFactory, urlSymbolServerList.ToList());
+                        var proxy = new DebuggerProxy(loggerFactory, urlSymbolServerList.ToList(), runtimeId);
 
                         System.Net.WebSockets.WebSocket ideSocket = await context.WebSockets.AcceptWebSocketAsync();
 

@@ -5,7 +5,8 @@
 .assembly extern System.Console { auto }
 .assembly extern mscorlib { auto }
 
-.assembly 'tailcall' { }
+.assembly 'tailcall_boxunbox' { }
+.assembly extern xunit.core {}
 .namespace JitTest
 {
   .class private auto ansi beforefieldinit App
@@ -178,6 +179,9 @@
     .method private hidebysig static int32 
             Main() cil managed
     {
+      .custom instance void [xunit.core]Xunit.FactAttribute::.ctor() = (
+          01 00 00 00
+      )
       .entrypoint
       .maxstack  4
       .locals (int32 V_0)

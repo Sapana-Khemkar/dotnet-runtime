@@ -193,6 +193,9 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets the time the associated process was started.</summary>
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public DateTime StartTime
         {
             get
@@ -262,14 +265,16 @@ namespace System.Diagnostics
         {
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+            [SupportedOSPlatform("maccatalyst")]
             get
             {
                 EnsureWorkingSetLimits();
                 return _maxWorkingSet;
             }
-            [SupportedOSPlatform("windows")]
-            [SupportedOSPlatform("macos")]
             [SupportedOSPlatform("freebsd")]
+            [SupportedOSPlatform("macos")]
+            [SupportedOSPlatform("maccatalyst")]
+            [SupportedOSPlatform("windows")]
             set
             {
                 SetWorkingSetLimits(null, value);
@@ -284,14 +289,16 @@ namespace System.Diagnostics
         {
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+            [SupportedOSPlatform("maccatalyst")]
             get
             {
                 EnsureWorkingSetLimits();
                 return _minWorkingSet;
             }
-            [SupportedOSPlatform("windows")]
-            [SupportedOSPlatform("macos")]
             [SupportedOSPlatform("freebsd")]
+            [SupportedOSPlatform("macos")]
+            [SupportedOSPlatform("maccatalyst")]
+            [SupportedOSPlatform("windows")]
             set
             {
                 SetWorkingSetLimits(value, null);
@@ -506,21 +513,6 @@ namespace System.Diagnostics
         /// <devdoc>
         ///    <para>
         ///       Gets
-        ///       the friendly name of the process.
-        ///    </para>
-        /// </devdoc>
-        public string ProcessName
-        {
-            get
-            {
-                EnsureState(State.HaveProcessInfo);
-                return _processInfo!.ProcessName;
-            }
-        }
-
-        /// <devdoc>
-        ///    <para>
-        ///       Gets
         ///       or sets which processors the threads in this process can be scheduled to run on.
         ///    </para>
         /// </devdoc>
@@ -576,10 +568,7 @@ namespace System.Diagnostics
             }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                ArgumentNullException.ThrowIfNull(value);
 
                 if (Associated)
                 {
@@ -837,6 +826,39 @@ namespace System.Diagnostics
             return WaitForInputIdleCore(milliseconds);
         }
 
+        /// <summary>
+        /// Causes the <see cref="Process"/> component to wait the specified <paramref name="timeout"/> for the associated process to enter an idle state.
+        /// This overload applies only to processes with a user interface and, therefore, a message loop.
+        /// </summary>
+        /// <param name="timeout">The amount of time, in milliseconds, to wait for the associated process to become idle.</param>
+        /// <returns><see langword="true"/> if the associated process has reached an idle state; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// The process does not have a graphical interface.
+        ///
+        /// -or-
+        ///
+        /// An unknown error occurred. The process failed to enter an idle state.
+        ///
+        /// -or-
+        ///
+        /// The process has already exited.
+        ///
+        /// -or-
+        ///
+        /// No process is associated with this <see cref="Process"/> object.
+        /// </exception>
+        /// <remarks>
+        /// Use <see cref="WaitForInputIdle(TimeSpan)"/> to force the processing of your application
+        /// to wait until the message loop has returned to the idle state.
+        /// When a process with a user interface is executing, its message loop executes every time
+        /// a Windows message is sent to the process by the operating system.
+        /// The process then returns to the message loop. A process is said to be in an idle state
+        /// when it is waiting for messages inside of a message loop.
+        /// This state is useful, for example, when your application needs to wait for a starting process
+        /// to finish creating its main window before the application communicates with that window.
+        /// </remarks>
+        public bool WaitForInputIdle(TimeSpan timeout) => WaitForInputIdle(ToTimeoutMilliseconds(timeout));
+
         public ISynchronizeInvoke? SynchronizingObject { get; set; }
 
         /// <devdoc>
@@ -1039,6 +1061,9 @@ namespace System.Diagnostics
         ///       local computer. These process resources share the specified process name.
         ///    </para>
         /// </devdoc>
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process[] GetProcessesByName(string? processName)
         {
             return GetProcessesByName(processName, ".");
@@ -1050,6 +1075,9 @@ namespace System.Diagnostics
         ///       component for each process resource on the local computer.
         ///    </para>
         /// </devdoc>
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process[] GetProcesses()
         {
             return GetProcesses(".");
@@ -1062,6 +1090,9 @@ namespace System.Diagnostics
         ///       process resource on the specified computer.
         ///    </para>
         /// </devdoc>
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process[] GetProcesses(string machineName)
         {
             bool isRemoteMachine = ProcessManager.IsRemoteMachine(machineName);
@@ -1205,6 +1236,7 @@ namespace System.Diagnostics
         /// </devdoc>
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public bool Start()
         {
             Close();
@@ -1230,6 +1262,17 @@ namespace System.Diagnostics
             {
                 throw new InvalidOperationException(SR.ArgumentAndArgumentListInitialized);
             }
+            if (startInfo.HasArgumentList)
+            {
+                int argumentCount = startInfo.ArgumentList.Count;
+                for (int i = 0; i < argumentCount; i++)
+                {
+                    if (startInfo.ArgumentList[i] is null)
+                    {
+                        throw new ArgumentNullException("item", SR.ArgumentListMayNotContainNull);
+                    }
+                }
+            }
 
             //Cannot start a new process and store its handle if the object has been disposed, since finalization has been suppressed.
             CheckDisposed();
@@ -1248,6 +1291,7 @@ namespace System.Diagnostics
         /// </devdoc>
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process Start(string fileName)
         {
             // the underlying Start method can only return null on Windows platforms,
@@ -1266,6 +1310,7 @@ namespace System.Diagnostics
         /// </devdoc>
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process Start(string fileName, string arguments)
         {
             // the underlying Start method can only return null on Windows platforms,
@@ -1279,13 +1324,9 @@ namespace System.Diagnostics
         /// </summary>
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-        public static Process Start(string fileName, IEnumerable<string> arguments)
+        [SupportedOSPlatform("maccatalyst")]
+        public static Process Start(string fileName!!, IEnumerable<string> arguments!!)
         {
-            if (fileName == null)
-                throw new ArgumentNullException(nameof(fileName));
-            if (arguments == null)
-                throw new ArgumentNullException(nameof(arguments));
-
             var startInfo = new ProcessStartInfo(fileName);
             foreach (string argument in arguments)
             {
@@ -1305,12 +1346,10 @@ namespace System.Diagnostics
         /// </devdoc>
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-        public static Process? Start(ProcessStartInfo startInfo)
+        [SupportedOSPlatform("maccatalyst")]
+        public static Process? Start(ProcessStartInfo startInfo!!)
         {
             Process process = new Process();
-            if (startInfo == null)
-                throw new ArgumentNullException(nameof(startInfo));
-
             process.StartInfo = startInfo;
             return process.Start() ?
                 process :
@@ -1406,6 +1445,22 @@ namespace System.Diagnostics
                 RaiseOnExited();
             }
             return exited;
+        }
+
+        /// <summary>
+        /// Instructs the Process component to wait the specified number of milliseconds for
+        /// the associated process to exit.
+        /// </summary>
+        public bool WaitForExit(TimeSpan timeout) => WaitForExit(ToTimeoutMilliseconds(timeout));
+
+        private static int ToTimeoutMilliseconds(TimeSpan timeout)
+        {
+            long totalMilliseconds = (long)timeout.TotalMilliseconds;
+            if (totalMilliseconds < -1 || totalMilliseconds > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout));
+            }
+            return (int)totalMilliseconds;
         }
 
         /// <summary>
@@ -1691,10 +1746,7 @@ namespace System.Diagnostics
         /// <exception cref="System.ObjectDisposedException">If the Proces has been disposed.</exception>
         private void CheckDisposed()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
+            ObjectDisposedException.ThrowIf(_disposed, this);
         }
 
         private static Win32Exception CreateExceptionForErrorStartingProcess(string errorMessage, int errorCode, string fileName, string? workingDirectory)

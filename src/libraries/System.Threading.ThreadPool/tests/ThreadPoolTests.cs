@@ -184,6 +184,24 @@ namespace System.Threading.ThreadPools.Tests
                     VerifyMinThreads(minw, minc);
                 }
             }).Dispose();
+
+            // Verify that SetMinThreads() and SetMaxThreads() return false when trying to set a different value from what is
+            // configured through config
+            var options = new RemoteInvokeOptions();
+            options.RuntimeConfigurationOptions["System.Threading.ThreadPool.MinThreads"] = "1";
+            options.RuntimeConfigurationOptions["System.Threading.ThreadPool.MaxThreads"] = "2";
+            RemoteExecutor.Invoke(() =>
+            {
+                int w, c;
+                ThreadPool.GetMinThreads(out w, out c);
+                Assert.Equal(1, w);
+                ThreadPool.GetMaxThreads(out w, out c);
+                Assert.Equal(2, w);
+                Assert.True(ThreadPool.SetMinThreads(1, 1));
+                Assert.True(ThreadPool.SetMaxThreads(2, 1));
+                Assert.False(ThreadPool.SetMinThreads(2, 1));
+                Assert.False(ThreadPool.SetMaxThreads(1, 1));
+            }, options).Dispose();
         }
 
         private static void VerifyMinThreads(int expectedMinw, int expectedMinc)
@@ -888,6 +906,7 @@ namespace System.Threading.ThreadPools.Tests
         }
 
         [ConditionalFact(nameof(IsThreadingAndRemoteExecutorSupported))]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/66852", TestPlatforms.OSX)]
         public static void CooperativeBlockingCanCreateThreadsFaster()
         {
             // Run in a separate process to test in a clean thread pool environment such that work items queued by the test

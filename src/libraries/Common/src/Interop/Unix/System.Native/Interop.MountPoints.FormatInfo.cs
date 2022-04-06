@@ -12,7 +12,7 @@ internal static partial class Interop
 #if DEBUG
         static Sys()
         {
-            foreach (string name in Enum.GetNames(typeof(UnixFileSystemTypes)))
+            foreach (string name in Enum.GetNames<UnixFileSystemTypes>())
             {
                 System.Diagnostics.Debug.Assert(GetDriveType(name) != DriveType.Unknown,
                     $"Expected {nameof(UnixFileSystemTypes)}.{name} to have an entry in {nameof(GetDriveType)}.");
@@ -30,11 +30,11 @@ internal static partial class Interop
             internal ulong TotalSize;
         }
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetSpaceInfoForMountPoint", SetLastError = true)]
-        internal static extern int GetSpaceInfoForMountPoint([MarshalAs(UnmanagedType.LPStr)]string name, out MountPointInformation mpi);
+        [LibraryImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetSpaceInfoForMountPoint", SetLastError = true)]
+        internal static partial int GetSpaceInfoForMountPoint([MarshalAs(UnmanagedType.LPStr)]string name, out MountPointInformation mpi);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetFormatInfoForMountPoint", SetLastError = true)]
-        private static extern unsafe int GetFormatInfoForMountPoint(
+        [LibraryImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetFormatInfoForMountPoint", SetLastError = true)]
+        private static unsafe partial int GetFormatInfoForMountPoint(
             [MarshalAs(UnmanagedType.LPStr)]string name,
             byte* formatNameBuffer,
             int bufferLength,

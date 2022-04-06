@@ -347,8 +347,8 @@ namespace System.Xml.Xsl
             static ItemType()
             {
 #if DEBUG
-                Array arrEnum = Enum.GetValues(typeof(XmlTypeCode));
-                Debug.Assert((XmlTypeCode)arrEnum.GetValue(arrEnum.Length - 1)! == XmlTypeCode.DayTimeDuration,
+                XmlTypeCode[] arrEnum = Enum.GetValues<XmlTypeCode>();
+                Debug.Assert(arrEnum[arrEnum.Length - 1] == XmlTypeCode.DayTimeDuration,
                              "DayTimeDuration is no longer the last item in XmlTypeCode.  This code expects it to be.");
 #endif
 
@@ -1176,7 +1176,7 @@ namespace System.Xml.Xsl
                 subtypeId = 2;
             else
             {
-                Debug.Fail("Don't know how to serialize " + type.GetType().ToString());
+                Debug.Fail($"Don't know how to serialize {type.GetType()}");
                 subtypeId = -1;
             }
 

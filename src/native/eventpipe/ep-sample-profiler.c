@@ -13,7 +13,6 @@
 #define NUM_NANOSECONDS_IN_1_MS 1000000
 
 static volatile uint32_t _profiling_enabled = (uint32_t)false;
-static ep_rt_thread_handle_t _sampling_thread = NULL;
 static EventPipeProvider *_sampling_provider = NULL;
 static EventPipeEvent *_thread_time_event = NULL;
 static ep_rt_wait_event_handle_t _thread_shutdown_event;
@@ -75,14 +74,6 @@ void
 sample_profiler_store_profiling_enabled (bool enabled)
 {
 	ep_rt_volatile_store_uint32_t (&_profiling_enabled, enabled ? 1 : 0);
-}
-
-static
-inline
-bool
-sample_profiler_load_can_start_sampling (void)
-{
-	return (ep_rt_volatile_load_uint32_t (&_can_start_sampling) != 0) ? true : false;
 }
 
 static

@@ -147,7 +147,7 @@ namespace System.Xml.Serialization
                     if (IsAnyType(schemaType, true, true))
                         return name;
                     i++;
-                    name = "any" + i.ToString(CultureInfo.InvariantCulture);
+                    name = string.Create(CultureInfo.InvariantCulture, $"any{i}");
                 }
             }
 
@@ -340,7 +340,7 @@ namespace System.Xml.Serialization
             return false;
         }
 
-        private XmlSchemaImport? FindImport(XmlSchema schema, string? ns)
+        private static XmlSchemaImport? FindImport(XmlSchema schema, string? ns)
         {
             foreach (object item in schema.Includes)
             {
@@ -572,7 +572,7 @@ namespace System.Xml.Serialization
             }
             else
             {
-                throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Unsupported anonymous mapping type: " + mapping.ToString()));
+                throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Unsupported anonymous mapping type: {mapping}"));
             }
         }
 
@@ -1199,7 +1199,7 @@ namespace System.Xml.Serialization
             return dataType;
         }
 
-        private void AddXmlnsAnnotation(XmlSchemaComplexType type, string xmlnsMemberName)
+        private static void AddXmlnsAnnotation(XmlSchemaComplexType type, string xmlnsMemberName)
         {
             XmlSchemaAnnotation annotation = new XmlSchemaAnnotation();
             XmlSchemaAppInfo appinfo = new XmlSchemaAppInfo();

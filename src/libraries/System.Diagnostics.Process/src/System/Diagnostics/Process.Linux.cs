@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace System.Diagnostics
@@ -17,6 +18,9 @@ namespace System.Diagnostics
         /// Creates an array of <see cref="Process"/> components that are associated with process resources on a
         /// remote computer. These process resources share the specified process name.
         /// </summary>
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+        [SupportedOSPlatform("maccatalyst")]
         public static Process[] GetProcessesByName(string? processName, string machineName)
         {
             ProcessManager.ThrowIfRemoteMachine(machineName);
@@ -104,7 +108,7 @@ namespace System.Diagnostics
             GetStat().ppid;
 
         /// <summary>Gets execution path</summary>
-        private string? GetPathToOpenFile()
+        private static string? GetPathToOpenFile()
         {
             string[] allowedProgramsToRun = { "xdg-open", "gnome-open", "kfmclient" };
             foreach (var program in allowedProgramsToRun)
@@ -234,7 +238,7 @@ namespace System.Diagnostics
         /// <param name="newMax">The new maximum working set limit, or null not to change it.</param>
         /// <param name="resultingMin">The resulting minimum working set limit after any changes applied.</param>
         /// <param name="resultingMax">The resulting maximum working set limit after any changes applied.</param>
-        private void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
+        private static void SetWorkingSetLimitsCore(IntPtr? newMin, IntPtr? newMax, out IntPtr resultingMin, out IntPtr resultingMax)
         {
             // RLIMIT_RSS with setrlimit not supported on Linux > 2.4.30.
             throw new PlatformNotSupportedException(SR.MinimumWorkingSetNotSupported);

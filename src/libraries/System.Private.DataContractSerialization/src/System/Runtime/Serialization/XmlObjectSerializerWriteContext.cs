@@ -120,7 +120,7 @@ namespace System.Runtime.Serialization
                 }
                 else
                 {
-                    SerializeWithXsiType(xmlWriter, obj, objTypeHandle, null /*type*/, declaredTypeID, declaredTypeHandle, Type.GetTypeFromHandle(declaredTypeHandle));
+                    SerializeWithXsiType(xmlWriter, obj, objTypeHandle, null /*type*/, declaredTypeID, declaredTypeHandle, Type.GetTypeFromHandle(declaredTypeHandle)!);
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace System.Runtime.Serialization
                 {
                     if (objectType == null)
                     {
-                        objectType = Type.GetTypeFromHandle(objectTypeHandle);
+                        objectType = Type.GetTypeFromHandle(objectTypeHandle)!;
                     }
                     WriteResolvedTypeInfo(xmlWriter, objectType, declaredType);
                 }
@@ -501,7 +501,7 @@ namespace System.Runtime.Serialization
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal void GetObjectData(ISerializable obj, SerializationInfo serInfo, StreamingContext context)
+        internal static void GetObjectData(ISerializable obj, SerializationInfo serInfo, StreamingContext context)
         {
             obj.GetObjectData(serInfo, context);
         }

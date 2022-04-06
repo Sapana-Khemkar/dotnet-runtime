@@ -8,19 +8,21 @@ using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Net.Quic.Tests
 {
     [ConditionalClass(typeof(QuicTestBase<MsQuicProviderFactory>), nameof(IsSupported))]
-    [Collection("NoParallelTests")]
+    [Collection(nameof(DisableParallelization))]
     public class MsQuicTests : QuicTestBase<MsQuicProviderFactory>
     {
         private static byte[] s_data = Encoding.UTF8.GetBytes("Hello world!");
@@ -58,6 +60,7 @@ namespace System.Net.Quic.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/46837", TestPlatforms.OSX)]
         public async Task ConnectWithCertificateChain()
         {
             (X509Certificate2 certificate, X509Certificate2Collection chain) = System.Net.Security.Tests.TestHelper.GenerateCertificates("localhost", longChain: true);
@@ -104,6 +107,7 @@ namespace System.Net.Quic.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/64944", TestPlatforms.Windows)]
         public async Task UntrustedClientCertificateFails()
         {
             var listenerOptions = new QuicListenerOptions();
@@ -135,10 +139,14 @@ namespace System.Net.Quic.Tests
             {
                 await t;
             }
-            catch { };
+            catch (Exception ex)
+            {
+                _output.WriteLine($"Ignored exception:{Environment.NewLine}{ex}");
+            }
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/67301", TestPlatforms.Linux)]
         public async Task CertificateCallbackThrowPropagates()
         {
             using CancellationTokenSource cts = new CancellationTokenSource(PassingTestTimeout);
@@ -180,6 +188,7 @@ namespace System.Net.Quic.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/67301", TestPlatforms.Linux)]
         public async Task ConnectWithCertificateCallback()
         {
             X509Certificate2 c1 = System.Net.Test.Common.Configuration.Certificates.GetServerCertificate();
@@ -301,7 +310,7 @@ namespace System.Net.Quic.Tests
             await Assert.ThrowsAsync<AuthenticationException>(async () => await clientTask);
         }
 
-        [Theory]
+        [ConditionalTheory]
         [InlineData("127.0.0.1", true)]
         [InlineData("::1", true)]
         [InlineData("127.0.0.1", false)]
@@ -309,6 +318,13 @@ namespace System.Net.Quic.Tests
         public async Task ConnectWithCertificateForLoopbackIP_IndicatesExpectedError(string ipString, bool expectsError)
         {
             var ipAddress = IPAddress.Parse(ipString);
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                // [ActiveIssue("https://github.com/dotnet/runtime/issues/67301")]
+                throw new SkipTestException("IPv6 on Linux is temporarily broken");
+            }
+
             (X509Certificate2 certificate, _) = System.Net.Security.Tests.TestHelper.GenerateCertificates(expectsError ? "badhost" : "localhost");
 
             var listenerOptions = new QuicListenerOptions();
@@ -331,6 +347,7 @@ namespace System.Net.Quic.Tests
         [Theory]
         [InlineData(true)]
         // [InlineData(false)] [ActiveIssue("https://github.com/dotnet/runtime/issues/57308")]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/64944", TestPlatforms.Windows)]
         public async Task ConnectWithClientCertificate(bool sendCerttificate)
         {
             bool clientCertificateOK = false;
@@ -372,6 +389,7 @@ namespace System.Net.Quic.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/67302")]
         public async Task WaitForAvailableUnidirectionStreamsAsyncWorks()
         {
             QuicListenerOptions listenerOptions = CreateQuicListenerOptions();
@@ -397,6 +415,7 @@ namespace System.Net.Quic.Tests
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/runtime/issues/67302")]
         public async Task WaitForAvailableBidirectionStreamsAsyncWorks()
         {
             QuicListenerOptions listenerOptions = CreateQuicListenerOptions();
@@ -431,7 +450,7 @@ namespace System.Net.Quic.Tests
             listenerOptions.ListenEndPoint = new IPEndPoint(IPAddress.Loopback, 0);
 
             (QuicConnection clientConnection, QuicConnection serverConnection) = await CreateConnectedQuicConnection(null, listenerOptions);
-            await Assert.ThrowsAsync<QuicOperationAbortedException>(async () => await serverConnection.AcceptStreamAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(100)));
+            await Assert.ThrowsAsync<QuicConnectionAbortedException>(async () => await serverConnection.AcceptStreamAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(100)));
             serverConnection.Dispose();
             clientConnection.Dispose();
         }

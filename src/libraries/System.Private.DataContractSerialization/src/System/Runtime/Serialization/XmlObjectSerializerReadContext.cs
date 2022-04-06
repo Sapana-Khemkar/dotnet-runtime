@@ -94,7 +94,7 @@ namespace System.Runtime.Serialization
         internal virtual object? InternalDeserialize(XmlReaderDelegator xmlReader, int id, RuntimeTypeHandle declaredTypeHandle, string name, string ns)
         {
             DataContract dataContract = GetDataContract(id, declaredTypeHandle);
-            return InternalDeserialize(xmlReader, name, ns, Type.GetTypeFromHandle(declaredTypeHandle), ref dataContract);
+            return InternalDeserialize(xmlReader, name, ns, Type.GetTypeFromHandle(declaredTypeHandle)!, ref dataContract);
         }
 
         [RequiresUnreferencedCode(DataContract.SerializerTrimmerWarning)]
@@ -885,7 +885,7 @@ namespace System.Runtime.Serialization
                 Read(xmlReader);
             }
 
-            while ((nodeType = xmlReader.MoveToContent()) != XmlNodeType.EndElement)
+            while (xmlReader.MoveToContent() != XmlNodeType.EndElement)
             {
                 if (xmlReader.EOF)
                     throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.UnexpectedEndOfFile));
@@ -983,7 +983,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        private bool IsContentNode(XmlNodeType nodeType)
+        private static bool IsContentNode(XmlNodeType nodeType)
         {
             switch (nodeType)
             {
