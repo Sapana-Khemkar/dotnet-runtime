@@ -25,7 +25,7 @@ namespace System.Runtime.InteropServices
 #elif TARGET_POWERPC64
             => Architecture.PowerPC64;
 #else
-#error Unknown Architecture;
+#error Unknown Architecture
 #endif
     }
 }

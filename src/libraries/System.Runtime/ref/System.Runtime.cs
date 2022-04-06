@@ -11819,7 +11819,7 @@ namespace System.Runtime.InteropServices
         S390x = 5,
         LoongArch64 = 6,
         Armv6 = 7,
-        POWERPC64 = 8,
+        PowerPC64 = 8,
     }
     public enum CharSet
     {
