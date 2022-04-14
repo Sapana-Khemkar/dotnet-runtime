@@ -14,14 +14,14 @@ C_FUNC(SignalHandlerWorkerReturnOffset\Alignment):
 // address set to SignalHandlerWorkerReturn during SIGSEGV handling.
 // It enables the unwinder to unwind stack from the handling code to the actual failure site.
 NESTED_ENTRY CallSignalHandlerWrapper\Alignment, _TEXT, NoHandler
-    stdu %r1,-32(%r1)
-    mfspr 12, 8
-	std %r12, 16(%r1)
+    stdu %r1,-544(%r1)
+    mfspr 3, 8
+	std %r3, 16(%r1)
     bl      EXTERNAL_C_FUNC(signal_handler_worker)
 LOCAL_LABEL(SignalHandlerWorkerReturn\Alignment):
-    ld %r12, 16(%r1)
-    mtspr 8, 12
-    stdu %r1,32(%r1)
+    ld %r3, 16(%r1)
+    mtspr 3, 12
+    stdu %r1,544(%r1)
     blr
 NESTED_END CallSignalHandlerWrapper\Alignment, _TEXT
 

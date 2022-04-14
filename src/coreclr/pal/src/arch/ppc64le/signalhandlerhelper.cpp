@@ -32,7 +32,8 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
 
     if (customSp == 0)
     {
-        customSp = faultSp;
+        // preserve 512 bytes long red zone and align stack pointer
+        customSp = ALIGN_DOWN(faultSp - 512, 16);
     }
 
     size_t fakeFrameReturnAddress;
@@ -48,7 +49,7 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
     // Build fake stack frame to enable the stack unwinder to unwind from signal_handler_worker to the faulting instruction
     size_t* saveArea = (size_t*)(customSp - 32);
     saveArea[0] = faultSp;
-    saveArea[3] = (size_t)MCREG_Link(ucontext->uc_mcontext);
+    saveArea[2] = (size_t)MCREG_Link(ucontext->uc_mcontext);
     size_t sp = (size_t)saveArea - 32;
 
     // Switch the current context to the signal_handler_worker and the custom stack
