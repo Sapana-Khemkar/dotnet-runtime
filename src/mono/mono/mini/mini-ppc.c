@@ -3192,6 +3192,7 @@ mono_arch_output_basic_block (MonoCompile *cfg, MonoBasicBlock *bb)
 				} else {
 					ppc_load (code, ppc_r0, ins->inst_offset);
                                         ppc_lwax (code, ins->dreg, ins->inst_basereg, ppc_r0);
+					ppc_lwax (code, ins->dreg, ins->inst_basereg, ppc_r0);
 				}
 			} else {
 				if (ppc_is_imm32 (ins->inst_offset) && (ins->dreg > 0)) {

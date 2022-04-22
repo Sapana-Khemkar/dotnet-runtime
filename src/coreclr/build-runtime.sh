@@ -48,7 +48,23 @@ handle_arguments_local() {
         staticanalyzer|-staticanalyzer)
             __StaticAnalyzer=1
             ;;
+	skipjit|-skipjit)
+            __BuildJit=0
+            ;;
+        skipalljits|-skipalljits)
+            __BuildAllJits=0
+            ;;
+        skipruntime|-skipruntime)
+            __BuildRuntime=0
+            ;;
 
+        skipiltools|-skipiltools)
+            __BuildILTools=0
+            ;;
+
+        paltests|-paltests)
+            __BuildPALTests=1
+            ;;
         component|-component)
             __RequestedBuildComponents="$__RequestedBuildComponents $2"
             __ShiftArgs=1
@@ -97,6 +113,11 @@ __UnprocessedBuildArgs=
 __UseNinja=0
 __VerboseBuild=0
 __CMakeArgs=""
+__BuildJit=1
+__BuildPALTests=0
+__BuildAllJits=1
+__BuildRuntime=1
+__BuildILTools=1
 __RequestedBuildComponents=""
 
 source "$__ProjectRoot"/_build-commons.sh
@@ -147,6 +168,7 @@ check_prereqs
 
 # Build the coreclr (native) components.
 __CMakeArgs="-DCLR_CMAKE_PGO_INSTRUMENT=$__PgoInstrument -DCLR_CMAKE_OPTDATA_PATH=$__PgoOptDataPath -DCLR_CMAKE_PGO_OPTIMIZE=$__PgoOptimize $__CMakeArgs"
+__CMakeArgs="-DCLR_CMAKE_BUILD_SUBSET_JIT=$__BuildJit -DCLR_CMAKE_BUILD_SUBSET_ALLJITS=$__BuildAllJits -DCLR_CMAKE_BUILD_SUBSET_RUNTIME=$__BuildRuntime $__CMakeArgs -DCLR_CMAKE_BUILD_SUBSET_ILTOOLS=$__BuildILTools"
 
 if [[ "$__SkipConfigure" == 0 && "$__CodeCoverage" == 1 ]]; then
     __CMakeArgs="-DCLR_CMAKE_ENABLE_CODE_COVERAGE=1 $__CMakeArgs"
