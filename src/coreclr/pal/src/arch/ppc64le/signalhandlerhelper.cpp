@@ -50,7 +50,7 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
     size_t* saveArea = (size_t*)(customSp - 32);
     saveArea[0] = faultSp;
     saveArea[2] = (size_t)MCREG_Link(ucontext->uc_mcontext);
-    size_t sp = (size_t)saveArea - 32;
+    size_t sp = customSp - 32;
 
     // Switch the current context to the signal_handler_worker and the custom stack
     CONTEXT context2;
