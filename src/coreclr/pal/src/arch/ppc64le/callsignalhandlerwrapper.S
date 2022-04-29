@@ -16,10 +16,10 @@ C_FUNC(SignalHandlerWorkerReturnOffset\Alignment):
 NESTED_ENTRY CallSignalHandlerWrapper\Alignment, _TEXT, NoHandler
     mflr %r0
 	std %r0, 16(%r1)
-    stdu %r1,-544(%r1)
+    stdu %r1,-32(%r1)
     bl      EXTERNAL_C_FUNC(signal_handler_worker)
 LOCAL_LABEL(SignalHandlerWorkerReturn\Alignment):
-    addi %r1, %r1, 544
+    addi %r1, %r1, 32
     ld %r0, 16(%r1)
     mtlr %r0
     blr

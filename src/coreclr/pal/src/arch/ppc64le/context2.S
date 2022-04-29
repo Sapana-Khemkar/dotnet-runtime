@@ -136,16 +136,8 @@ LEAF_ENTRY RtlRestoreContext, _TEXT
 	lfd %f30, CONTEXT_F30(%r3)
 	lfd %f31, CONTEXT_F31(%r3)
 
-	// Restore Control Registers - XER, LR and CTR
-	ld %r5, CONTEXT_XER(%r3)
-	mtspr 1, 5
-	ld %r5, CONTEXT_CTR(%r3)
-	mtspr 9, 5
-	ld %r0, CONTEXT_LINK(%r3)
-	mtlr %r0
-
 	// Restore all general purpose registers
-	ld %r1, CONTEXT_R1(%r3)
+	//ld %r1, CONTEXT_R1(%r3)
 	ld %r2, CONTEXT_R2(%r3)
 	ld %r4, CONTEXT_R4(%r3)
 	ld %r5, CONTEXT_R5(%r3)
@@ -174,8 +166,18 @@ LEAF_ENTRY RtlRestoreContext, _TEXT
 	ld %r28, CONTEXT_R28(%r3)
 	ld %r29, CONTEXT_R29(%r3)
 	ld %r30, CONTEXT_R30(%r3)
-	ld %r31, CONTEXT_R31(%r3)
-	ld %r3, CONTEXT_R3(%r3)
+	//ld %r31, CONTEXT_R31(%r3)
+
+	// Restore Control Registers - XER, LR and CTR
+	ld %r5, CONTEXT_XER(%r3)
+	mtspr 1, 5
+	ld %r5, CONTEXT_CTR(%r3)
+	mtspr 9, 5
+	ld %r0, CONTEXT_LINK(%r3)
 	
+
+	ld %r3, CONTEXT_R3(%r3)
+	mtlr %r0
+
 	blr
 LEAF_END RtlRestoreContext, _TEXT

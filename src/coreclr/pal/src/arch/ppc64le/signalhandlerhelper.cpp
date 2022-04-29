@@ -32,8 +32,7 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
 
     if (customSp == 0)
     {
-        // preserve 512 bytes long red zone and align stack pointer
-        customSp = ALIGN_DOWN(faultSp - 512, 16);
+        customSp = faultSp;
     }
 
     size_t fakeFrameReturnAddress;
@@ -62,8 +61,7 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
     context2.R4 = (size_t)siginfo;
     context2.R5 = (size_t)context;
     context2.R6 = (size_t)returnPoint;
-    //context2.Link = fakeFrameReturnAddress;
-    context2.R31 = fakeFrameReturnAddress;
+    //context2.R31 = fakeFrameReturnAddress;
 
     RtlRestoreContext(&context2, NULL);
 }
