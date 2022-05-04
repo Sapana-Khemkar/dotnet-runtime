@@ -48,20 +48,20 @@ void ExecuteHandlerOnCustomStack(int code, siginfo_t *siginfo, void *context, si
     // Build fake stack frame to enable the stack unwinder to unwind from signal_handler_worker to the faulting instruction
     size_t* saveArea = (size_t*)(customSp - 32);
     saveArea[0] = faultSp;
-    saveArea[2] = (size_t)MCREG_Link(ucontext->uc_mcontext);
+    saveArea[2] = (size_t)MCREG_Nip(ucontext->uc_mcontext);
     size_t sp = customSp - 32;
 
     // Switch the current context to the signal_handler_worker and the custom stack
     CONTEXT context2;
     RtlCaptureContext(&context2);
 
-    context2.Link = (size_t)signal_handler_worker;
+    context2.Nip = (size_t)signal_handler_worker;
     context2.R1 = sp;
     context2.R3 = code;
     context2.R4 = (size_t)siginfo;
     context2.R5 = (size_t)context;
     context2.R6 = (size_t)returnPoint;
-    //context2.R31 = fakeFrameReturnAddress;
+    context2.Link = fakeFrameReturnAddress;
 
     RtlRestoreContext(&context2, NULL);
 }
