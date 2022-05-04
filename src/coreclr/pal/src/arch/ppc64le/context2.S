@@ -173,6 +173,10 @@ LEAF_ENTRY RtlRestoreContext, _TEXT
 	ld %r12, CONTEXT_XER(%r3)
 	mtspr 1, 12
 
+	// Restore Control Register - LR
+	ld %r12, CONTEXT_LINK(%r3)
+	mtlr %r12
+
 	// Load NIP into R12 and CTR registers
 	ld %r12, CONTEXT_NIP(%r3)
 	mtctr %r12
@@ -181,5 +185,5 @@ LEAF_ENTRY RtlRestoreContext, _TEXT
 	ld %r3, CONTEXT_R3(%r3)
 
 	// Branch to CTR register location
-	bctrl
+	bctr
 LEAF_END RtlRestoreContext, _TEXT
