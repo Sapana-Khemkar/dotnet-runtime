@@ -7,6 +7,9 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // This function creates a stack frame right below the target frame, restores all callee
+// saved registers from the passed in context, sets R15 to that frame and sets the
+// return address to the target frame's PSW address.
+// Then it uses the ThrowExceptionHelper to throw the passed in exception from that context.
 // EXTERN_C void ThrowExceptionFromContextInternal(CONTEXT* context, PAL_SEHException* ex);
 LEAF_ENTRY ThrowExceptionFromContextInternal, _TEXT
 
@@ -30,8 +33,6 @@ LEAF_ENTRY ThrowExceptionFromContextInternal, _TEXT
 	lfd %f31, CONTEXT_F31(%r3)
 
 	// Restore all non volatile general purpose registers
-	ld %r2, CONTEXT_R2(%r3)
-	ld %r13, CONTEXT_R13(%r3)
 	ld %r14, CONTEXT_R14(%r3)
 	ld %r15, CONTEXT_R15(%r3)
 	ld %r16, CONTEXT_R16(%r3)
@@ -53,9 +54,8 @@ LEAF_ENTRY ThrowExceptionFromContextInternal, _TEXT
 	ld %r0, CONTEXT_LINK(%r3)
 	mtlr %r0
 	ld %r1, CONTEXT_R1(%r3)
-	
 
 	// The PAL_SEHException pointer
 	mr     %r3, %r4
-	bl     EXTERNAL_C_FUNC(ThrowExceptionHelper)
+	b      EXTERNAL_C_FUNC(ThrowExceptionHelper)
 LEAF_END ThrowExceptionFromContextInternal, _TEXT
