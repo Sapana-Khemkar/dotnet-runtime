@@ -51,8 +51,10 @@ LEAF_ENTRY ThrowExceptionFromContextInternal, _TEXT
 	ld %r29, CONTEXT_R29(%r3)
 	ld %r30, CONTEXT_R30(%r3)
 	ld %r31, CONTEXT_R31(%r3)
-	ld %r0, CONTEXT_LINK(%r3)
+
+	ld %r0, CONTEXT_NIP(%r3)
 	mtlr %r0
+
 	ld %r1, CONTEXT_R1(%r3)
 
 	// The PAL_SEHException pointer
